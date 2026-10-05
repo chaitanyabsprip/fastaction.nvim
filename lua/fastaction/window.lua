@@ -125,6 +125,10 @@ function M.popup_window(content, on_buf_create, opts, window_highlight)
         content[i] = line
     end
 
+    -- A title wider than the items would wrap and push them out of the fixed-height window.
+    if opts.title ~= false then
+        width = math.max(width, vim.fn.strdisplaywidth(' ' .. (opts.prompt or opts.title)))
+    end
     -- Add right padding of 1 each.
     width = width + 1
     opts.divider = opts.divider or '─'
