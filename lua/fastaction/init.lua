@@ -85,7 +85,7 @@ function M.select(items, opts, on_choice)
     )
 
     local brackets = config.get().brackets or { '[', ']' }
-    for i, option in ipairs(options) do
+    for _, option in ipairs(options) do
         local spacing = largest_char_count + 1 - option.char_count
 
         local source_text = ''
@@ -93,18 +93,25 @@ function M.select(items, opts, on_choice)
             source_text = source
             return ''
         end)
+        -- Buffer lines can't contain newlines; render extra lines indented under the first.
+        local action_lines = vim.split(action_text, '\n', { plain = true })
 
-        content[i] = {
-            {
-                text = string.format('%s%s%s', brackets[1], option.key, brackets[2]),
-                highlight = conf.popup.highlight.key,
-            },
+        local key_text = string.format('%s%s%s', brackets[1], option.key, brackets[2])
+        content[#content + 1] = {
+            { text = key_text, highlight = conf.popup.highlight.key },
             { text = ' ', highlight = conf.popup.highlight.window },
-            { text = action_text, highlight = conf.popup.highlight.action },
+            { text = action_lines[1], highlight = conf.popup.highlight.action },
             { text = source_text, highlight = conf.popup.highlight.source },
             { text = string.rep(' ', spacing), highlight = conf.popup.highlight.window },
             { text = option.right_section },
         }
+        local indent = string.rep(' ', vim.fn.strdisplaywidth(key_text) + 1)
+        for j = 2, #action_lines do
+            content[#content + 1] = {
+                { text = indent, highlight = conf.popup.highlight.window },
+                { text = action_lines[j], highlight = conf.popup.highlight.action },
+            }
+        end
     end
 
     ---@param buffer integer

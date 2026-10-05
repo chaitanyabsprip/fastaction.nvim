@@ -69,7 +69,8 @@ function M.get_action_configs(items, opts, skip_priority, options, largest_char_
 
         local item_right_section = conf.format_right_section and conf.format_right_section(item)
             or ''
-        local item_char_count = #item_name + #item_right_section
+        -- Only the first line of a multi-line item shares a row with the right section.
+        local item_char_count = #item_name:match '[^\n]*' + #item_right_section
         largest_char_count = math.max(item_char_count, largest_char_count)
         options[#options + 1] = {
             item = item,
